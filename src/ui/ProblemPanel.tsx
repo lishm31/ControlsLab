@@ -3,7 +3,7 @@ import { makeRng, randomSeed } from '../core/rng';
 import { HINT_TEXT } from '../engine/check';
 import type { CheckResult, ProblemGenerator } from '../engine/types';
 import { recordAttempt, useProgress } from '../engine/useProgress';
-import { sig } from './format';
+import { clean, sig } from './format';
 import { Panel } from './Panel';
 import { RichText, Tex } from './Tex';
 import { Status } from './Telemetry';
@@ -90,7 +90,7 @@ export function ProblemPanel<P>({ generators, onLoadSim }: Props<P>) {
                       {g.label} {g.tex && <Tex tex={g.tex} />}
                     </td>
                     <td className="num mono">
-                      {sig(g.value, 4)} <span className="unit">{g.unit}</span>
+                      {clean(g.value, 4)} <span className="unit">{g.unit}</span>
                     </td>
                   </tr>
                 ))}

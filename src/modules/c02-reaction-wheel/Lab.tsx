@@ -318,7 +318,9 @@ export function Lab({ params: p, setParams, problemSlot }: LabProps<RWParams>) {
                   <td className="num mono">
                     {r.measured} <span className="unit">{r.unit}</span>
                   </td>
-                  <td className="tvm__note">{r.flag ? <Status level="caution">{r.flag}</Status> : <span className="faint">match</span>}</td>
+                  <td className="tvm__note">
+                    {r.flag ? <Status level="caution">{r.flag}</Status> : r.theory === 'n/a' || r.measured === 'n/a' ? <span className="faint">-</span> : <span className="faint">match</span>}
+                  </td>
                 </tr>
               ))}
             </tbody>
