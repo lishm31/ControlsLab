@@ -19,3 +19,9 @@ export function sig(x: number, n = 4): string {
 
 /** Signed with an explicit plus, for telemetry deltas. */
 export const signed = (x: number, d = 2) => (x > 0 ? '+' : '') + fix(x, d);
+
+/** Up to n significant figures with trailing zeros dropped, for given values like "5 %" or "0.035". */
+export function clean(x: number, n = 4): string {
+  const s = sig(x, n);
+  return s.includes('.') && !s.includes('e') ? s.replace(/0+$/, '').replace(/\.$/, '') : s;
+}

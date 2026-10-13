@@ -218,9 +218,9 @@ const bangPlan: Gen = {
       answer,
       steps: () => [
         { text: 'Convert the slew to radians.', tex: `\\theta_1 = ${theta1Deg}\\cdot\\pi/180`, value: { v: th1, unit: 'rad' } },
-        { text: 'By symmetry half the angle is covered while accelerating.', tex: '\\frac{\\theta_1}{2} = \\frac{1}{2}\\frac{u^*}{I}t_s^2 \;\\Rightarrow\; t_s = \\sqrt{\\frac{I\\theta_1}{u^*}}', value: { v: ts, unit: 's' } },
+        { text: 'By symmetry half the angle is covered while accelerating.', tex: '\\frac{\\theta_1}{2} = \\frac{1}{2}\\frac{u^*}{I}t_s^2 \\;\\Rightarrow\\; t_s = \\sqrt{\\frac{I\\theta_1}{u^*}}', value: { v: ts, unit: 's' } },
         { text: 'Peak rate at the switch.', tex: '\\dot\\theta_{max} = \\frac{u^* t_s}{I}', value: { v: answer.rate, unit: 'deg/s' } },
-        { text: 'Total momentum stays zero, so the wheel holds the opposite momentum.', tex: 'I_w\\omega_w = -I\\dot\\theta \;\\Rightarrow\; |\\omega_w| = \\frac{I\\dot\\theta_{max}}{I_w}\\cdot\\frac{60}{2\\pi}', value: { v: answer.rpm, unit: 'rpm' } },
+        { text: 'Total momentum stays zero, so the wheel holds the opposite momentum.', tex: 'I_w\\omega_w = -I\\dot\\theta \\;\\Rightarrow\\; |\\omega_w| = \\frac{I\\dot\\theta_{max}}{I_w}\\cdot\\frac{60}{2\\pi}', value: { v: answer.rpm, unit: 'rpm' } },
       ],
       toSim: () => ({ ...clean, mode: 'bangbang', I, Iw, theta1Deg, uMax: u }),
     });
