@@ -79,3 +79,71 @@
     display: none;
   }
 }
+
+/* ---------- plots ---------- */
+.tplot,
+.splane {
+  position: relative;
+  min-width: 0;
+}
+.tplot__svg {
+  display: block;
+  touch-action: pan-y;
+}
+.tplot__svg:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.tplot__tick {
+  font: 400 10px var(--font-mono);
+  fill: var(--text-faint);
+}
+.tplot__axislabel {
+  font: 500 10px var(--font-mono);
+  fill: var(--text-dim);
+}
+.tplot__ref {
+  font: 500 10px var(--font-mono);
+  fill: var(--accent);
+}
+.tplot__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  margin: 0 0 4px;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+}
+.tplot__legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.tplot__tip {
+  position: absolute;
+  top: 24px;
+  z-index: 5;
+  min-width: 140px;
+  padding: 6px 8px;
+  background: var(--bg-2);
+  border: 1px solid var(--rule-strong);
+  font-size: 11px;
+  pointer-events: none;
+}
+.tplot__tiphead {
+  color: var(--text-faint);
+  margin-bottom: 3px;
+}
+.tplot__tiprow {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-dim);
+}
+.tplot__tiprow b {
+  color: var(--text);
+  font-weight: 500;
+}
