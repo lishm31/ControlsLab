@@ -12,6 +12,7 @@ export interface PDMeasured {
   finalAngleDeg: number;
   offsetDeg: number;
   peakTorque: number;
+  peakRateDegS: number;
   peakWheelRpm: number;
 }
 
@@ -28,6 +29,7 @@ export function measurePD(run: RWRun, p: RWParams): PDMeasured {
     finalAngleDeg: rad2deg(last),
     offsetDeg: rad2deg(last - th1),
     peakTorque: Math.max(...run.u.map(Math.abs)),
+    peakRateDegS: rad2deg(Math.max(...run.rate.map(Math.abs))),
     peakWheelRpm: Math.max(...run.wheel.map((w) => Math.abs(radps2rpm(w)))),
   };
 }

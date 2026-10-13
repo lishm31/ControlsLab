@@ -1,11 +1,13 @@
-// Placeholder until the module lands in the next commits.
-import type { ModuleDefinition } from '../types';
 import { MODULES } from '../manifest';
+import type { ModuleDefinition } from '../types';
+import { Lab } from './Lab';
+import { DEFAULTS, type RWParams } from './model';
+import { PROBLEMS } from './problems';
 
-const def: ModuleDefinition<Record<string, never>> = {
+const def: ModuleDefinition<RWParams> = {
   manifest: MODULES.find((m) => m.id === 'c02-reaction-wheel')!,
-  defaults: {},
-  Lab: () => null,
-  problems: [],
+  defaults: DEFAULTS,
+  Lab,
+  problems: PROBLEMS,
 };
 export default def;

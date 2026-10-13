@@ -49,12 +49,12 @@ export class SlewScene {
     r.toneMapping = THREE.ACESFilmicToneMapping;
     r.toneMappingExposure = 1.05;
     r.shadowMap.enabled = true;
-    r.shadowMap.type = THREE.PCFSoftShadowMap;
+    r.shadowMap.type = THREE.PCFShadowMap;
     r.domElement.className = 'scene3d__canvas';
     host.appendChild(r.domElement);
 
     this.camera = new THREE.PerspectiveCamera(30, 1, 0.05, 2000);
-    this.camera.position.set(6.2, 3.1, 7.4);
+    this.camera.position.set(5.6, 2.5, 6.8);
     this.controls = new OrbitControls(this.camera, r.domElement);
     this.controls.target.set(0.2, -0.25, 0);
     this.controls.enableDamping = !opts.reducedMotion;
@@ -82,6 +82,7 @@ export class SlewScene {
     sh.camera.near = 2;
     sh.camera.far = 25;
     sh.bias = -0.0004;
+    sh.radius = 3;
     sh.normalBias = 0.02;
     s.add(sun);
     // Earth shine from below, faint and blue.
@@ -224,7 +225,7 @@ export class SlewScene {
   };
 
   resetView() {
-    this.camera.position.set(6.2, 3.1, 7.4);
+    this.camera.position.set(5.6, 2.5, 6.8);
     this.controls.target.set(0.2, -0.25, 0);
     this.controls.update();
     this.dirty = true;

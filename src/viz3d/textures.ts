@@ -60,25 +60,23 @@ export function mliTextures() {
     const height = new Float32Array(W * W);
     for (let y = 0; y < W; y++)
       for (let x = 0; x < W; x++) {
-        const u = x / W;
-        const v = y / W;
-        // tileable by sampling a torus in 4D-ish via 3D trick
-        const a = u * Math.PI * 2;
-        height[y * W + x] = 0.5 + 0.35 * fbm(Math.cos(a) * 1.6 + 10, Math.sin(a) * 1.6 + v * 6, v * 3, 5);
+        // Tileable: sample noise on a torus.
+        const a = (x / W) * Math.PI * 2;
+        const b = (y / W) * Math.PI * 2;
+        height[y * W + x] = 0.5 + 0.18 * fbm(Math.cos(a) * 2.2, Math.sin(a) * 2.2 + Math.cos(b) * 2.2, Math.sin(b) * 2.2, 4);
       }
-    // Creases: short straight ridges in random directions, like crumpled foil.
+    // Creases: lots of short thin ridges in random directions, like handled foil.
     const [, cg] = canvas(W, W);
     cg.fillStyle = '#000';
     cg.fillRect(0, 0, W, W);
     cg.lineCap = 'round';
-    for (let i = 0; i < 900; i++) {
+    for (let i = 0; i < 2600; i++) {
       const x = rng.next() * W;
       const y = rng.next() * W;
       const ang = rng.next() * Math.PI;
-      const len = 8 + rng.next() * 60;
-      const wdt = 0.6 + rng.next() * 1.8;
-      cg.strokeStyle = `rgba(255,255,255,${0.12 + rng.next() * 0.35})`;
-      cg.lineWidth = wdt;
+      const len = 4 + Math.pow(rng.next(), 2) * 46;
+      cg.strokeStyle = `rgba(255,255,255,${0.06 + rng.next() * 0.22})`;
+      cg.lineWidth = 0.5 + rng.next() * 1.1;
       for (const ox of [-W, 0, W])
         for (const oy of [-W, 0, W]) {
           cg.beginPath();
@@ -88,30 +86,29 @@ export function mliTextures() {
         }
     }
     const crease = cg.getImageData(0, 0, W, W).data;
-    for (let i = 0; i < W * W; i++) height[i] += (crease[i * 4] / 255) * 0.5;
-    const normal = normalFromHeight(height, W, W, 5.5);
+    for (let i = 0; i < W * W; i++) height[i] += (crease[i * 4] / 255) * 0.35;
+    const normal = normalFromHeight(height, W, W, 8);
 
-    // Albedo: gold with slight tonal variation, darker in folds, plus tape seams.
+    // Albedo: gold, only slight tonal variation (foil color is uniform, the look comes from reflections).
     const [ac, ag] = canvas(W, W);
     const img = ag.createImageData(W, W);
     for (let i = 0; i < W * W; i++) {
-      const hgt = height[i];
-      const k = 0.82 + 0.3 * (hgt - 0.5);
+      const k = 0.94 + 0.12 * (height[i] - 0.5);
       img.data[i * 4] = Math.min(255, 232 * k);
-      img.data[i * 4 + 1] = Math.min(255, 178 * k);
-      img.data[i * 4 + 2] = Math.min(255, 88 * k);
+      img.data[i * 4 + 1] = Math.min(255, 164 * k);
+      img.data[i * 4 + 2] = Math.min(255, 62 * k);
       img.data[i * 4 + 3] = 255;
     }
     ag.putImageData(img, 0, 0);
-    ag.fillStyle = 'rgba(120,80,30,0.45)';
-    ag.fillRect(0, W * 0.5 - 5, W, 10); // Kapton tape seam
-    ag.fillRect(W * 0.25 - 4, 0, 8, W);
+    ag.fillStyle = 'rgba(150,100,40,0.35)';
+    ag.fillRect(0, W * 0.5 - 4, W, 8); // tape seam
+    ag.fillRect(W * 0.25 - 3, 0, 6, W);
 
-    // Roughness: creases scatter more light.
+    // Roughness: smooth foil, creases a bit rougher.
     const [rc, rg] = canvas(W, W);
     const rimg = rg.createImageData(W, W);
     for (let i = 0; i < W * W; i++) {
-      const r = 70 + (crease[i * 4] / 255) * 120 + (height[i] - 0.5) * 60;
+      const r = 60 + (crease[i * 4] / 255) * 90 + (height[i] - 0.5) * 40;
       rimg.data[i * 4] = rimg.data[i * 4 + 1] = rimg.data[i * 4 + 2] = Math.max(0, Math.min(255, r));
       rimg.data[i * 4 + 3] = 255;
     }
@@ -264,8 +261,8 @@ export function honeycombTexture() {
  */
 export function earthTextures(seed = 3) {
   return once(`earth${seed}`, () => {
-    const W = 1024;
-    const H = 512;
+    const W = 2048;
+    const H = 1024;
     const land = makeNoise3(seed);
     const cloud = makeNoise3(seed + 100);
     const [c, g] = canvas(W, H);
@@ -283,19 +280,19 @@ export function earthTextures(seed = 3) {
         const pz = Math.cos(lat) * Math.sin(lon);
         const e = land.fbm(px * 1.8 + 3, py * 1.8, pz * 1.8, 6) + 0.05;
         const i = (y * W + x) * 4;
-        const polar = Math.abs(lat) > 1.22 + 0.08 * land.noise(px * 6, py * 6, pz * 6);
+        const polar = Math.abs(lat) > 1.3 + 0.08 * land.noise(px * 6, py * 6, pz * 6);
         let r: number, gg: number, b: number, rough: number;
         if (polar) {
           [r, gg, b, rough] = [235, 240, 245, 200];
-        } else if (e > 0.06) {
+        } else if (e > 0.11) {
           const dry = Math.max(0, Math.min(1, 1.6 * (0.45 - Math.abs(lat)) + 0.6 * land.noise(px * 5, py * 5, pz * 5)));
-          const m = Math.min(1, (e - 0.06) * 4);
+          const m = Math.min(1, (e - 0.11) * 4);
           r = 70 + 90 * dry + 30 * m;
           gg = 90 + 50 * dry + 10 * m;
           b = 50 + 30 * dry;
           rough = 235;
         } else {
-          const depth = Math.min(1, (0.06 - e) * 5);
+          const depth = Math.min(1, (0.11 - e) * 5);
           r = 10 + 12 * (1 - depth);
           gg = 38 + 45 * (1 - depth);
           b = 80 + 60 * (1 - depth);
@@ -308,7 +305,7 @@ export function earthTextures(seed = 3) {
         rimg.data[i] = rimg.data[i + 1] = rimg.data[i + 2] = rough;
         rimg.data[i + 3] = 255;
         const cl = cloud.fbm(px * 2.5, py * 5.5, pz * 2.5, 6);
-        const a = Math.max(0, Math.min(1, (cl - 0.02) * 3.2));
+        const a = Math.max(0, Math.min(1, (cl - 0.1) * 3.4));
         cimg.data[i] = cimg.data[i + 1] = cimg.data[i + 2] = 255;
         cimg.data[i + 3] = a * 235;
       }
