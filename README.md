@@ -8,7 +8,7 @@ It runs fully in the browser (Vite, TypeScript, React, Three.js). The math lives
 
 | Code | Lecture | Module | Status |
 |---|---|---|---|
-| C-1 | Oct 13 | Linear Systems Explorer | planned |
+| C-1 | Oct 13 | Linear Systems Explorer | live |
 | C-2 | Oct 15 | Reaction Wheel Slew | live |
 | C-3 | Oct 20 | Laplace Workbench | planned |
 | C-4 | Oct 22 | Block Diagram Builder | planned |
@@ -23,12 +23,12 @@ It runs fully in the browser (Vite, TypeScript, React, Three.js). The math lives
 | C-13 | Dec 1 | TF to SS Converter | planned |
 | C-14 | Dec 3 | Failure Replays | planned |
 
-Each live module has a writeup next to its code, for example [C-2 notes](src/modules/c02-reaction-wheel/notes.md).
+Each live module has a writeup next to its code: [C-1 notes](src/modules/c01-linear-systems/notes.md), [C-2 notes](src/modules/c02-reaction-wheel/notes.md).
 
 ## How the math is checked
 
-- `src/core`: polynomials and roots, eigenvalues, matrix exponential, transfer functions, state space, exact discretized step/impulse/ramp responses, step metrics, Routh arrays, RK4.
-- `verify/gen_golden.py` writes about 250 test cases from numpy, scipy, and python-control into `verify/golden/`. The TS tests compare against them. CI regenerates them and fails if anything drifted.
+- `src/core`: polynomials and roots, eigenvalues, matrix exponential, transfer functions, state space, exact discretized step/impulse/ramp responses, step metrics, Routh arrays, RK4, partial fractions and inverse Laplace, Pade delay, error constants, Ackermann pole placement, and LQR.
+- `verify/gen_golden.py` writes about 330 test cases from numpy, scipy, and python-control into `verify/golden/`. The TS tests compare against them. CI regenerates them and fails if anything drifted.
 - Each module tests its sim against the closed-form theory from lecture, and runs every practice problem generator over 200 random seeds to make sure the hidden answer is right and that it plays out the same way in the sim.
 
 ## Running it

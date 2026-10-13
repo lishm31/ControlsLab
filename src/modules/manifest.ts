@@ -3,7 +3,7 @@ import type { ModuleDefinition, ModuleManifest } from './types';
 const m = (x: ModuleManifest) => x;
 
 export const MODULES: ModuleManifest[] = [
-  m({ id: 'c01-linear-systems', code: 'C-1', title: 'Linear Systems Explorer', lecture: 'Linear dynamical systems and solutions', lectureDate: '2026-10-13', topics: ['linear-systems'], status: 'planned', blurb: 'Second order free response, phase portrait, eigenvalues in the plane.' }),
+  m({ id: 'c01-linear-systems', code: 'C-1', title: 'Linear Systems Explorer', lecture: 'Linear dynamical systems and solutions', lectureDate: '2026-10-13', topics: ['linear-systems'], status: 'live', blurb: 'Second order free response, phase portrait, eigenvalues in the plane.' }),
   m({ id: 'c02-reaction-wheel', code: 'C-2', title: 'Reaction Wheel Slew', lecture: 'Feedback control basics', lectureDate: '2026-10-15', topics: ['feedback-basics'], status: 'live', blurb: 'Single axis slew. Open loop bang-bang vs PD, inertia error, disturbance torque.' }),
   m({ id: 'c03-laplace', code: 'C-3', title: 'Laplace Workbench', lecture: 'Laplace transforms', lectureDate: '2026-10-20', topics: ['laplace'], status: 'planned', blurb: 'ODE to s-domain, partial fractions step by step, pole location to time response.' }),
   m({ id: 'c04-block-diagrams', code: 'C-4', title: 'Block Diagram Builder', lecture: 'Block diagrams', lectureDate: '2026-10-22', topics: ['block-diagrams'], status: 'planned', blurb: 'Series, parallel, feedback. Reduce to one TF with the steps shown.' }),
@@ -21,6 +21,7 @@ export const MODULES: ModuleManifest[] = [
 
 /** Lazy loaders, one chunk per module, so Three.js only loads where it is used. */
 export const LOADERS: Record<string, () => Promise<ModuleDefinition>> = {
+  'c01-linear-systems': () => import('./c01-linear-systems').then((x) => x.default),
   'c02-reaction-wheel': () => import('./c02-reaction-wheel').then((x) => x.default),
 };
 
