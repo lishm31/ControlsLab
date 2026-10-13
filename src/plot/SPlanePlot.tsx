@@ -19,13 +19,17 @@ interface Props {
   zetaLines?: number[];
   /** Minimum half-extent of the view, so the axes do not jump around for small changes. */
   minExtent?: number;
+  /** Loci to draw under the markers, e.g. where the eigenvalues go as a parameter sweeps. */
+  paths?: { id: string; label: string; points: Complex[] }[];
+  /** Fixed half-extent (overrides auto fit). */
+  extent?: number;
   summary: string;
 }
 
 const M = 26;
 const colorVar = (c: string) => (c === 'ink' ? 'var(--s-ink)' : `var(--${c})`);
 
-function SPlaneImpl({ sets, height = 220, zetaLines, minExtent = 1, summary }: Props) {
+function SPlaneImpl({ sets, height = 220, zetaLines, minExtent = 1, summary, paths, extent }: Props) {
   const [ref, width] = useWidth<HTMLDivElement>(300);
   const W = Math.max(200, width);
   const H = height;
@@ -33,7 +37,7 @@ function SPlaneImpl({ sets, height = 220, zetaLines, minExtent = 1, summary }: P
     const pts = sets.flatMap((s) => s.points).filter((z) => Number.isFinite(z.re) && Number.isFinite(z.im));
     let ext = minExtent;
     for (const z of pts) ext = Math.max(ext, Math.abs(z.re) * 1.15, Math.abs(z.im) * 1.15);
-    ext = niceStep(ext, 1) * Math.ceil(ext / niceStep(ext, 1));
+    ext = extent ?? niceStep(ext, 1) * Math.ceil(ext / niceStep(ext, 1));
     // Equal scaling on both axes so angles (damping) read correctly.
     const pxPerUnit = Math.min((W - 2 * M) / (2 * ext), (H - 2 * M) / (2 * ext));
     const cx = W / 2;
@@ -44,7 +48,7 @@ function SPlaneImpl({ sets, height = 220, zetaLines, minExtent = 1, summary }: P
     const sy = linear([-yr, yr], [cy + yr * pxPerUnit, cy - yr * pxPerUnit]);
     const step = niceStep(xr, 3);
     return { sx, sy, xr, yr, xt: ticks(-xr, xr, Math.max(4, Math.floor(W / 70))), yt: ticks(-yr, yr, 4), step };
-  }, [sets, W, H, minExtent]);
+  }, [sets, W, H, minExtent, extent]);
   const { sx, sy } = g;
   return (
     <div className="splane" ref={ref}>
@@ -109,6 +113,21 @@ function SPlaneImpl({ sets, height = 220, zetaLines, minExtent = 1, summary }: P
         <text x={sx(0) + 5} y={sy(g.yr) + 10} className="tplot__axislabel">
           Im [rad/s]
         </text>
+        {paths?.map((pa) => (
+          <polyline
+            key={pa.id}
+            points={pa.points
+              .filter((z) => Math.abs(z.re) <= g.xr && Math.abs(z.im) <= g.yr)
+              .map((z) => `${sx(z.re).toFixed(1)},${sy(z.im).toFixed(1)}`)
+              .join(' ')}
+            fill="none"
+            stroke="var(--s-ink)"
+            strokeOpacity="0.45"
+            strokeDasharray="3 3"
+          >
+            <title>{pa.label}</title>
+          </polyline>
+        ))}
         {sets.map((s) =>
           s.points.map((z, i) => {
             const x = sx(z.re);
