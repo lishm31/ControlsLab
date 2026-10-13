@@ -16,10 +16,11 @@
   --ok: #4cc38a;
   --caution: #e3cf4a;
   --alarm: #ff6159;
-  --s1: #7ab4ff;
-  --s2: #4fc6b4;
-  --s3: #c9d1d9;
-  --s4: #ff9b8a;
+  /* Plot series: two validated categorical slots (blue, magenta). Theory and
+     reference curves use dashed ink instead of a third hue. */
+  --s1: #3987e5;
+  --s2: #d55181;
+  --s-ink: #aeb8c2;
   --plot-grid: #1a222b;
   --plot-axis: #3a4652;
   --hatch: rgba(255, 97, 89, 0.12);
@@ -43,10 +44,9 @@
   --ok: #1d8350;
   --caution: #8a7000;
   --alarm: #c42b25;
-  --s1: #1f5fc4;
-  --s2: #0d7d6e;
-  --s3: #2b3138;
-  --s4: #c4422f;
+  --s1: #2a78d6;
+  --s2: #d55181;
+  --s-ink: #3d454e;
   --plot-grid: #e4e0d8;
   --plot-axis: #a39d90;
   --hatch: rgba(196, 43, 37, 0.1);
