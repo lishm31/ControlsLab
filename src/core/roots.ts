@@ -95,7 +95,7 @@ function aberth(a: Poly): Complex[] {
  * For real polynomials, complex roots come in conjugate pairs. Snap tiny imaginary
  * parts to zero and make each pair exactly conjugate.
  */
-function cleanConjugates(rs: Complex[]): Complex[] {
+export function cleanConjugates(rs: Complex[]): Complex[] {
   const out = rs.map((r) => (Math.abs(r.im) <= 1e-9 * Math.max(1, cabs(r)) ? cx(r.re) : r));
   const used = new Array(out.length).fill(false);
   for (let i = 0; i < out.length; i++) {
