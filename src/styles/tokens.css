@@ -1,0 +1,67 @@
+/* Design tokens. One accent (signal amber). Semantic colors are for status only. */
+:root,
+:root[data-theme='dark'] {
+  --bg: #0a0d11;
+  --bg-1: #0f141a;
+  --bg-2: #151c24;
+  --bg-3: #1c2530;
+  --rule: #222b35;
+  --rule-strong: #33404d;
+  --text: #d6dde4;
+  --text-dim: #8b97a4;
+  --text-faint: #5c6874;
+  --accent: #f2a93b;
+  --accent-dim: rgba(242, 169, 59, 0.16);
+  --accent-ink: #1b1204;
+  --ok: #4cc38a;
+  --caution: #e3cf4a;
+  --alarm: #ff6159;
+  --s1: #7ab4ff;
+  --s2: #4fc6b4;
+  --s3: #c9d1d9;
+  --s4: #ff9b8a;
+  --plot-grid: #1a222b;
+  --plot-axis: #3a4652;
+  --hatch: rgba(255, 97, 89, 0.12);
+  --shadow: none;
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  --bg: #efede7;
+  --bg-1: #f8f7f3;
+  --bg-2: #ffffff;
+  --bg-3: #e6e3db;
+  --rule: #d6d2c8;
+  --rule-strong: #b8b2a5;
+  --text: #1a1f25;
+  --text-dim: #545d68;
+  --text-faint: #858c95;
+  --accent: #b36800;
+  --accent-dim: rgba(179, 104, 0, 0.12);
+  --accent-ink: #ffffff;
+  --ok: #1d8350;
+  --caution: #8a7000;
+  --alarm: #c42b25;
+  --s1: #1f5fc4;
+  --s2: #0d7d6e;
+  --s3: #2b3138;
+  --s4: #c4422f;
+  --plot-grid: #e4e0d8;
+  --plot-axis: #a39d90;
+  --hatch: rgba(196, 43, 37, 0.1);
+  color-scheme: light;
+}
+
+:root {
+  --font-ui: 'IBM Plex Sans Condensed', 'Arial Narrow', 'Roboto Condensed', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --u: 8px;
+  --radius: 2px;
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-md: 14px;
+  --fs-lg: 17px;
+  --fs-xl: 22px;
+  --focus: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+}
