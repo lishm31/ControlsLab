@@ -42,6 +42,17 @@ describe('C-1 free response', () => {
     const E0 = p.wn ** 2 * p.x0 ** 2 + p.v0 ** 2;
     run.t.forEach((_t, k) => expectClose(p.wn ** 2 * run.x[k] ** 2 + run.v[k] ** 2, E0, 1e-9));
   });
+  it('critically damped crosses zero once only when thrown hard enough toward it', () => {
+    const crossings = (v0: number) => {
+      const run = simulate(P({ zeta: 1, wn: 2, x0: 1, v0 }), 20, 4000);
+      let n = 0;
+      for (let k = 1; k < run.x.length; k++) if (Math.sign(run.x[k]) !== Math.sign(run.x[k - 1]) && Math.abs(run.x[k]) > 1e-12) n++;
+      return n;
+    };
+    expect(crossings(0)).toBe(0);
+    expect(crossings(-1.9)).toBe(0); // v0 > -wn x0
+    expect(crossings(-6)).toBe(1); // v0 < -wn x0
+  });
   it('2% settling is close to the envelope estimate for light damping', () => {
     const p = P({ zeta: 0.1, wn: 2 });
     const ts = settleTime(simulate(p, 60, 20000), p.x0);

@@ -331,3 +331,104 @@
     max-width: none;
   }
 }
+
+/* ---------- C-1 mechanism ---------- */
+.mech {
+  background: var(--bg-1);
+  border: 1px solid var(--rule);
+  min-width: 0;
+}
+.mech svg {
+  display: block;
+}
+.mech__m {
+  font: 600 14px var(--font-mono);
+  fill: var(--text);
+}
+.mech__warn {
+  font: 600 11px var(--font-ui);
+  fill: var(--caution);
+}
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+.presets .btn {
+  min-height: 26px;
+  padding: 0 8px;
+  font-size: 10px;
+}
+.kv {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 10px;
+  margin: 0;
+  font-size: var(--fs-sm);
+}
+.kv dt {
+  color: var(--text-dim);
+}
+.kv dd {
+  margin: 0;
+  text-align: right;
+  font-family: var(--font-mono);
+}
+.lab--notele {
+  grid-template-areas:
+    'ctrl view side'
+    'ctrl plots prac';
+}
+@media (max-width: 1400px) {
+  .lab--notele {
+    grid-template-areas:
+      'ctrl view'
+      'ctrl side'
+      'plots plots'
+      'prac prac';
+  }
+}
+@media (max-width: 900px) {
+  .lab--notele {
+    grid-template-areas: 'view' 'ctrl' 'side' 'plots' 'prac';
+  }
+}
+.telemetry__text {
+  font-family: var(--font-ui);
+  font-size: 14px;
+}
+.lab__plots--one {
+  grid-template-columns: minmax(0, 1fr);
+}
+.telemetry__cell--wide {
+  grid-column: span 2;
+}
+.lab__eq {
+  margin: 0 0 12px;
+  font-size: var(--fs-sm);
+  color: var(--text);
+}
+.lab__stack {
+  margin-top: 10px;
+}
+.lab--c01 {
+  grid-template-areas:
+    'tele tele tele'
+    'ctrl view side'
+    'ctrl prac side';
+}
+@media (max-width: 1400px) {
+  .lab--c01 {
+    grid-template-areas:
+      'tele tele'
+      'ctrl view'
+      'side side'
+      'prac prac';
+  }
+}
+@media (max-width: 900px) {
+  .lab--c01 {
+    grid-template-areas: 'view' 'tele' 'ctrl' 'side' 'prac';
+  }
+}

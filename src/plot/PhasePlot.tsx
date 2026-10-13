@@ -1,5 +1,4 @@
 import { memo, useMemo, type PointerEvent } from 'react';
-import { sig } from '../ui/format';
 import { linear, niceStep, tickLabel, ticks } from './scale';
 import { useWidth } from './useSize';
 
@@ -78,7 +77,9 @@ function PhaseImpl({ A, traj, current, extent, xLabel, yLabel, eigLines, onPick,
   const pick = (e: PointerEvent<SVGRectElement>) => {
     if (!onPick) return;
     const box = (e.currentTarget.ownerSVGElement as SVGSVGElement).getBoundingClientRect();
-    onPick(Number(sig(sx.invert(e.clientX - box.left), 3)), Number(sig(sy.invert(e.clientY - box.top), 3)));
+    // Round to 3 significant figures. (Not via the display formatter: it uses a real minus sign.)
+    const r3 = (v: number) => Number(v.toPrecision(3));
+    onPick(r3(sx.invert(e.clientX - box.left)), r3(sy.invert(e.clientY - box.top)));
   };
 
   return (

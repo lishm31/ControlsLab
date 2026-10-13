@@ -12,6 +12,8 @@ export interface Series {
   y: number[];
   color: SeriesColor;
   dash?: boolean;
+  /** Draw it but leave it out of the legend and tooltip (e.g. the lower half of an envelope). */
+  hideInLegend?: boolean;
 }
 
 /** Forbidden region for spec boxes: the response must stay out of it. */
@@ -95,9 +97,9 @@ function TimePlotImpl(p: TimePlotProps) {
 
   return (
     <div className="tplot" ref={ref}>
-      {p.series.length > 1 && (
+      {p.series.filter((s) => !s.hideInLegend).length > 1 && (
         <ul className="tplot__legend" aria-label="Legend">
-          {p.series.map((s) => (
+          {p.series.filter((s) => !s.hideInLegend).map((s) => (
             <li key={s.id}>
               <svg width="18" height="8" aria-hidden="true">
                 <line x1="0" y1="4" x2="18" y2="4" stroke={colorVar(s.color)} strokeWidth="2" strokeDasharray={s.dash ? '4 3' : undefined} />
@@ -238,7 +240,7 @@ function TimePlotImpl(p: TimePlotProps) {
       {hoverIdx !== null && hoverT !== null && first && (
         <div className="tplot__tip mono" style={tipLeft ? { right: W - tipX + 10 } : { left: tipX + 10 }} aria-live="polite">
           <div className="tplot__tiphead">t = {sig(first.t[hoverIdx], 4)} s</div>
-          {p.series.map((s) => {
+          {p.series.filter((s) => !s.hideInLegend).map((s) => {
             const v = s.y[s === first ? hoverIdx : nearestIndex(s.t, hoverT)];
             return (
               <div key={s.id} className="tplot__tiprow">
