@@ -45,8 +45,14 @@ describe('C-1 free response', () => {
   it('critically damped crosses zero once only when thrown hard enough toward it', () => {
     const crossings = (v0: number) => {
       const run = simulate(P({ zeta: 1, wn: 2, x0: 1, v0 }), 20, 4000);
+      // Count sign changes between samples that are clearly nonzero (a sample can land right on zero).
       let n = 0;
-      for (let k = 1; k < run.x.length; k++) if (Math.sign(run.x[k]) !== Math.sign(run.x[k - 1]) && Math.abs(run.x[k]) > 1e-12) n++;
+      let last = Math.sign(run.x[0]);
+      for (const v of run.x) {
+        if (Math.abs(v) < 1e-9) continue;
+        if (Math.sign(v) !== last) n++;
+        last = Math.sign(v);
+      }
       return n;
     };
     expect(crossings(0)).toBe(0);
