@@ -60,22 +60,27 @@ export function stepInfo(t: number[], y: number[], opts: StepInfoOptions = {}): 
     settlingTime = t[lastOut] + Math.min(1, Math.max(0, f)) * (t[lastOut + 1] - t[lastOut]);
   }
 
-  // Peak and overshoot (by magnitude, as in python-control).
+  // Overshoot uses the signed maximum, peak uses the magnitude (both as in python-control).
+  let ymax = -Infinity;
+  let ymin = Infinity;
   let kPeak = 0;
-  for (let k = 1; k < y.length; k++) if (Math.abs(y[k]) > Math.abs(y[kPeak])) kPeak = k;
+  for (let k = 0; k < y.length; k++) {
+    ymax = Math.max(ymax, sgn * y[k]);
+    ymin = Math.min(ymin, sgn * y[k]);
+    if (Math.abs(y[k]) > Math.abs(y[kPeak])) kPeak = k;
+  }
   const peak = Math.abs(y[kPeak]);
-  const overshoot = Math.max(0, (100 * (peak - Math.abs(yf))) / Math.abs(yf));
-  const ymin = Math.min(...y.map((v) => sgn * v));
-  const undershoot = Math.max(0, (-100 * ymin) / Math.abs(yf));
+  const overshoot = Math.max(0, (100 * (Math.abs(ymax) - Math.abs(yf))) / Math.abs(yf));
+  const undershoot = ymin < 0 ? Math.abs((100 * sgn * ymin) / yf) : 0;
 
-  // Settling min/max over the part of the response after the rise.
+  // Settling min/max over the response after it first reaches the upper rise limit.
   const kRise = y.findIndex((v) => sgn * (v - rHi * yf) >= 0);
   const tail = kRise >= 0 ? y.slice(kRise) : y;
   return {
     riseTime,
     settlingTime,
-    settlingMin: Math.min(...tail),
-    settlingMax: Math.max(...tail),
+    settlingMin: Math.min(...tail, yf),
+    settlingMax: Math.max(...tail, yf),
     overshoot,
     undershoot,
     peak,
