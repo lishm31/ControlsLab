@@ -197,7 +197,14 @@ function TimePlotImpl(p: TimePlotProps) {
         <text x={W - M.r} y={H - 3} textAnchor="end" className="tplot__axislabel">
           {(p.xLabel ?? 'time') + ' [' + (p.xUnit ?? 's') + ']'}
         </text>
-        <text x={4} y={M.t + 2} className="tplot__axislabel" dominantBaseline="hanging" transform={`rotate(-90 4 ${M.t + 2}) translate(${-(H - M.b - M.t)} 0)`}>
+        <text
+          x={9}
+          y={(M.t + H - M.b) / 2}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          className="tplot__axislabel"
+          transform={`rotate(-90 9 ${(M.t + H - M.b) / 2})`}
+        >
           {`${p.yLabel} [${p.yUnit}]`}
         </text>
         {/* playhead */}
