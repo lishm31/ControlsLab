@@ -19,7 +19,7 @@ export function makeStarfield(count = 6000, radius = 600) {
     pos.set([radius * r * Math.cos(th), radius * u, radius * r * Math.sin(th)], i * 3);
     // magnitude-like distribution: most stars faint, a few bright
     const m = Math.pow(rng.next(), 6);
-    size[i] = 0.8 + m * 3.2;
+    size[i] = 1.1 + m * 3.6;
     const temp = rng.next();
     // spread from blue-white to warm
     const c = temp < 0.15 ? [0.75, 0.82, 1] : temp > 0.85 ? [1, 0.86, 0.7] : [1, 0.97, 0.94];
@@ -65,14 +65,43 @@ export function makeEarth() {
   const R = 90;
   const group = new THREE.Group();
   const t = earthTextures();
+  // Custom shader so the planet gets proper day/night shading, ocean glint, and clouds
+  // without the bright PBR lights for the spacecraft blowing it out.
   const surface = new THREE.Mesh(
-    new THREE.SphereGeometry(R, 128, 96),
-    new THREE.MeshStandardMaterial({ map: t.map, roughnessMap: t.roughnessMap, metalness: 0, roughness: 1 }),
+    new THREE.SphereGeometry(R, 160, 120),
+    new THREE.ShaderMaterial({
+      uniforms: { map: { value: t.map }, clouds: { value: t.clouds }, rough: { value: t.roughnessMap }, sunDir: { value: SUN_DIR.clone() } },
+      vertexShader: /* glsl */ `
+        varying vec2 vUv; varying vec3 vN; varying vec3 vV;
+        void main() {
+          vUv = uv;
+          vec4 wp = modelMatrix * vec4(position, 1.0);
+          vN = normalize(mat3(modelMatrix) * normal);
+          vV = normalize(cameraPosition - wp.xyz);
+          gl_Position = projectionMatrix * viewMatrix * wp;
+        }`,
+      fragmentShader: /* glsl */ `
+        uniform sampler2D map; uniform sampler2D clouds; uniform sampler2D rough; uniform vec3 sunDir;
+        varying vec2 vUv; varying vec3 vN; varying vec3 vV;
+        void main() {
+          vec3 N = normalize(vN);
+          vec3 day = texture2D(map, vUv).rgb;
+          float cl = texture2D(clouds, vUv).a;
+          float ocean = 1.0 - smoothstep(0.3, 0.6, texture2D(rough, vUv).r);
+          float ndl = dot(N, sunDir);
+          float lit = max(ndl, 0.0);
+          vec3 col = mix(day, vec3(0.92), cl * 0.85) * (0.015 + 1.05 * lit);
+          vec3 H = normalize(sunDir + vV);
+          col += vec3(1.0, 0.9, 0.75) * pow(max(dot(N, H), 0.0), 60.0) * 0.35 * ocean * (1.0 - cl) * step(0.0, ndl);
+          float fres = pow(1.0 - max(dot(N, vV), 0.0), 2.5);
+          col = mix(col, vec3(0.32, 0.55, 1.0) * (0.1 + lit), fres * 0.65 * smoothstep(-0.1, 0.3, ndl));
+          gl_FragColor = vec4(col, 1.0);
+          #include <tonemapping_fragment>
+          #include <colorspace_fragment>
+        }`,
+    }),
   );
-  const clouds = new THREE.Mesh(
-    new THREE.SphereGeometry(R * 1.006, 128, 96),
-    new THREE.MeshStandardMaterial({ map: t.clouds, transparent: true, depthWrite: false, roughness: 1, metalness: 0 }),
-  );
+  group.add(surface);
   // Atmosphere: view-angle (fresnel) glow, brighter on the lit side.
   const atmo = new THREE.Mesh(
     new THREE.SphereGeometry(R * 1.035, 96, 64),
@@ -103,9 +132,10 @@ export function makeEarth() {
       side: THREE.FrontSide,
     }),
   );
-  group.add(surface, clouds, atmo);
-  group.position.set(-25, -104, -50);
-  group.rotation.set(0.3, 2.2, 0.15);
+  group.add(atmo);
+  // Tip the globe so mid-latitudes face up (looking straight down at a pole looks wrong).
+  group.position.set(-30, -118, -110);
+  group.rotation.set(1.25, 0.2, 0.5);
   return group;
 }
 
@@ -134,8 +164,10 @@ export function makeEnvMap(renderer: THREE.WebGLRenderer) {
   g.fillRect(0, 0, W, H);
   const earth = earthTextures().canvas;
   // Lower hemisphere: Earth, a bit dimmed, with a blue horizon band.
-  g.globalAlpha = 0.85;
-  g.drawImage(earth, 0, H * 0.58, W, H * 0.42);
+  g.globalAlpha = 1;
+  g.drawImage(earth, 0, H * 0.52, W, H * 0.48);
+  g.fillStyle = 'rgba(200,215,235,0.18)';
+  g.fillRect(0, H * 0.52, W, H * 0.48);
   g.globalAlpha = 1;
   const band = g.createLinearGradient(0, H * 0.5, 0, H * 0.62);
   band.addColorStop(0, 'rgba(60,120,220,0)');
@@ -148,11 +180,11 @@ export function makeEnvMap(renderer: THREE.WebGLRenderer) {
   const el = Math.asin(SUN_DIR.y);
   const sx = ((0.5 - az / (2 * Math.PI)) % 1) * W;
   const sy = (0.5 - el / Math.PI) * H;
-  const sg = g.createRadialGradient(sx, sy, 0, sx, sy, 14);
+  const sg = g.createRadialGradient(sx, sy, 0, sx, sy, 22);
   sg.addColorStop(0, 'rgba(255,255,255,1)');
   sg.addColorStop(1, 'rgba(255,240,220,0)');
   g.fillStyle = sg;
-  g.fillRect(sx - 16, sy - 16, 32, 32);
+  g.fillRect(sx - 24, sy - 24, 48, 48);
   const t = new THREE.CanvasTexture(c);
   t.mapping = THREE.EquirectangularReflectionMapping;
   t.colorSpace = THREE.SRGBColorSpace;

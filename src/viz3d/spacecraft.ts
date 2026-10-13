@@ -27,15 +27,21 @@ export interface Materials {
 function makeMaterials(): Materials {
   const mli = mliTextures();
   return {
+    // MLI outer layer is amber Kapton film over aluminized layers: a colored, partly
+    // metallic base with a glossy crinkled film on top (the clearcoat).
     gold: new THREE.MeshPhysicalMaterial({
       color: 0xffffff,
       map: mli.map,
       normalMap: mli.normalMap,
-      normalScale: new THREE.Vector2(0.9, 0.9),
+      normalScale: new THREE.Vector2(0.8, 0.8),
       roughnessMap: mli.roughnessMap,
-      roughness: 0.55,
-      metalness: 1,
-      envMapIntensity: 1.25,
+      roughness: 0.85,
+      metalness: 0.55,
+      clearcoat: 0.8,
+      clearcoatRoughness: 0.18,
+      clearcoatNormalMap: mli.normalMap,
+      clearcoatNormalScale: new THREE.Vector2(0.9, 0.9),
+      envMapIntensity: 1.8,
     }),
     radiator: new THREE.MeshStandardMaterial({ map: radiatorTexture(), roughness: 0.62, metalness: 0.05 }),
     interior: new THREE.MeshStandardMaterial({ map: honeycombTexture(), roughness: 0.75, metalness: 0.5, color: 0x9aa0a8 }),
@@ -255,6 +261,10 @@ function buildWheel(M: Materials) {
     new THREE.MeshStandardMaterial({ color: 0xd8d2c0, roughness: 0.7 }),
   );
   g.add(harness);
+  // Cutaway visualization light: the notch would otherwise sit in its own shadow.
+  const lamp = new THREE.PointLight(0xfff1dc, 1.6, 1.4, 1.5);
+  lamp.position.set(0.15, 0.45, 0.2);
+  g.add(lamp);
   return { group: g, rotor, spokes, stripe, smearMat };
 }
 

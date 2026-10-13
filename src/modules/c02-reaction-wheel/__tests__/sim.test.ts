@@ -23,6 +23,15 @@ describe('PD slew', () => {
     expectClose(m.overshoot, th.overshoot, 2e-3);
     expectClose(m.peakTime, th.peakTime, 2e-3);
   });
+  it('peak body rate and wheel speed match the closed form', () => {
+    for (const z of [0.2, 0.5, 0.7, 0.9]) {
+      const p = P({ KD: 2 * z * Math.sqrt(0.5 * 50) });
+      const m = measurePD(simulate(p), p);
+      const th = pdTheory(p);
+      expectClose(m.peakRateDegS, rad2deg(th.peakRate), 1e-4);
+      expectClose(m.peakWheelRpm, th.peakWheelRpm, 1e-4);
+    }
+  });
   it('a constant disturbance leaves a steady-state offset of d/Kp', () => {
     const p = P({ dist: 0.01 });
     // Run long enough for the transient to die out completely

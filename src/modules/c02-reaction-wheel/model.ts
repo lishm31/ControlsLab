@@ -12,6 +12,8 @@ import { deg2rad, radps2rpm } from '../../core/units';
 import { overshootPct, peakTime, settlingTime2pct, wnZetaFromPD } from '../../core/secondOrder';
 
 export type Mode = 'pd' | 'bangbang';
+/** Wheel: torque comes from spinning the wheel the other way. Thrusters: expelled mass, no stored momentum. */
+export type Actuator = 'wheel' | 'thrusters';
 
 export interface RWParams {
   mode: Mode;
@@ -26,6 +28,7 @@ export interface RWParams {
   torqueLimit: boolean;
   inertiaErr: number; // e, as a fraction (0.1 = true inertia 10% high)
   dist: number; // constant disturbance torque [N m]
+  actuator: Actuator;
 }
 
 /** Small-sat scale numbers: a ~200 kg spacecraft and a 4 N m s class wheel. */
@@ -41,6 +44,7 @@ export const DEFAULTS: RWParams = {
   torqueLimit: false,
   inertiaErr: 0,
   dist: 0,
+  actuator: 'wheel',
 };
 
 export const trueInertia = (p: RWParams) => p.I * (1 + p.inertiaErr);
@@ -79,7 +83,22 @@ export function pdTheory(p: RWParams) {
     finalAngleDeg: p.theta1Deg + (offsetRad * 180) / Math.PI,
     // Torque at t = 0+ before the rate builds up.
     initialTorque: p.Kp * deg2rad(p.theta1Deg),
+    ...pdPeakRate(p, wn, zeta),
   };
+}
+
+/**
+ * Peak body rate of the ideal underdamped response. The rate is
+ * theta1 wn / sqrt(1 - z^2) e^{-z wn t} sin(wd t); setting its derivative to zero gives
+ * tan(wd t*) = sqrt(1 - z^2) / z. The wheel holds the opposite momentum: Iw w = -I theta_dot.
+ */
+function pdPeakRate(p: RWParams, wn: number, zeta: number) {
+  if (!(zeta < 1)) return { peakRate: NaN, peakWheelRpm: NaN };
+  const s = Math.sqrt(1 - zeta * zeta);
+  const wd = wn * s;
+  const tStar = Math.atan2(s, zeta) / wd;
+  const peakRate = ((Math.abs(deg2rad(p.theta1Deg)) * wn) / s) * Math.exp(-zeta * wn * tStar) * Math.sin(wd * tStar);
+  return { peakRate, peakWheelRpm: radps2rpm((p.I * peakRate) / p.Iw) };
 }
 
 /** Closed loop poles with the true inertia: Ia s^2 + KD s + Kp = 0. */

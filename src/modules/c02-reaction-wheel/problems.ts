@@ -12,7 +12,7 @@ import { DEFAULTS, type RWParams } from './model';
 import { simulate } from './sim';
 
 const MOD = 'c02-reaction-wheel';
-const clean: Partial<RWParams> = { inertiaErr: 0, dist: 0, torqueLimit: false, compare: false };
+const clean: Partial<RWParams> = { inertiaErr: 0, dist: 0, torqueLimit: false, compare: false, actuator: 'wheel' };
 type Gen = ProblemGenerator<RWParams>;
 
 // ---------------------------------------------------------------- 1. read the gains
@@ -38,7 +38,7 @@ const readGains: Gen = {
       prompt:
         'A spacecraft slews about one axis, $I\\ddot\\theta = u$, with PD control $u = K_p(\\theta_1 - \\theta) - K_D\\dot\\theta$. Find the natural frequency, damping ratio, percent overshoot, and the 2% settling time estimate $4/(\\zeta\\omega_n)$.',
       given: [
-        { label: 'Inertia', tex: 'I', value: I, unit: 'kg m^2' },
+        { label: 'Inertia', tex: 'I', value: I, unit: 'kg m²' },
         { label: 'Proportional gain', tex: 'K_p', value: Kp, unit: 'N m/rad' },
         { label: 'Derivative gain', tex: 'K_D', value: KD, unit: 'N m s/rad' },
       ],
@@ -78,7 +78,7 @@ const designWnZeta: Gen = {
       title: this.title,
       prompt: 'Pick PD gains so the closed loop slew has the given natural frequency and damping ratio.',
       given: [
-        { label: 'Inertia', tex: 'I', value: I, unit: 'kg m^2' },
+        { label: 'Inertia', tex: 'I', value: I, unit: 'kg m²' },
         { label: 'Natural frequency', tex: '\\omega_n', value: wn, unit: 'rad/s' },
         { label: 'Damping ratio', tex: '\\zeta', value: zeta, unit: '' },
       ],
@@ -151,7 +151,7 @@ const meetSpec: Gen = {
       title: this.title,
       prompt: `Design PD gains for a ${theta1Deg} deg slew. The sim runs your gains and checks both specs, so any design that meets them passes. No torque limit.`,
       given: [
-        { label: 'Inertia', tex: 'I', value: I, unit: 'kg m^2' },
+        { label: 'Inertia', tex: 'I', value: I, unit: 'kg m²' },
         { label: 'Slew angle', tex: '\\theta_1', value: theta1Deg, unit: 'deg' },
         { label: 'Max overshoot', tex: 'M_p', value: osMax, unit: '%' },
         { label: 'Max 2% settling time', tex: 't_s', value: tsMax, unit: 's' },
@@ -205,8 +205,8 @@ const bangPlan: Gen = {
       prompt:
         'Open loop rest-to-rest slew with one reaction wheel: torque $+u^*$ until the switch time $t_s$, then $-u^*$ for another $t_s$. Find the switch time, the peak body rate, and the peak wheel speed.',
       given: [
-        { label: 'Spacecraft inertia', tex: 'I', value: I, unit: 'kg m^2' },
-        { label: 'Wheel inertia', tex: 'I_w', value: Iw, unit: 'kg m^2' },
+        { label: 'Spacecraft inertia', tex: 'I', value: I, unit: 'kg m²' },
+        { label: 'Wheel inertia', tex: 'I_w', value: Iw, unit: 'kg m²' },
         { label: 'Slew angle', tex: '\\theta_1', value: theta1Deg, unit: 'deg' },
         { label: 'Wheel torque', tex: 'u^*', value: u, unit: 'N m' },
       ],
@@ -249,8 +249,8 @@ const inertiaError: Gen = {
       prompt:
         'A bang-bang slew is planned with the nominal inertia, but the real spacecraft inertia is different (propellant mass, deployed hardware). Where does it actually stop, and what is the pointing error $\\theta_1 - \\theta_f$?',
       given: [
-        { label: 'Nominal inertia (used for the plan)', tex: 'I', value: I, unit: 'kg m^2' },
-        { label: 'True inertia', tex: 'I_a', value: sf(Ia, 4), unit: 'kg m^2' },
+        { label: 'Nominal inertia (used for the plan)', tex: 'I', value: I, unit: 'kg m²' },
+        { label: 'True inertia', tex: 'I_a', value: sf(Ia, 4), unit: 'kg m²' },
         { label: 'Commanded slew', tex: '\\theta_1', value: theta1Deg, unit: 'deg' },
         { label: 'Wheel torque', tex: 'u^*', value: u, unit: 'N m' },
       ],
@@ -294,7 +294,7 @@ const disturbance: Gen = {
       prompt:
         'A constant disturbance torque $d$ (solar pressure, gravity gradient) acts on the PD controlled spacecraft: $I\\ddot\\theta = u + d$. Find the steady-state offset $\\theta_{ss} - \\theta_1$ (signed), then the smallest $K_p$ that keeps $|\\theta_{ss} - \\theta_1| \\le \\varepsilon$.',
       given: [
-        { label: 'Inertia', tex: 'I', value: I, unit: 'kg m^2' },
+        { label: 'Inertia', tex: 'I', value: I, unit: 'kg m²' },
         { label: 'Proportional gain', tex: 'K_p', value: Kp, unit: 'N m/rad' },
         { label: 'Derivative gain', tex: 'K_D', value: KD, unit: 'N m s/rad' },
         { label: 'Disturbance torque', tex: 'd', value: d, unit: 'N m' },

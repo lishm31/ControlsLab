@@ -56,7 +56,8 @@ export function simulate(p: RWParams, mode: Mode = p.mode, tEnd = autoEnd(p, mod
   };
   const applied = (t: number, x: number[]) => (mode === 'bangbang' ? law(t, x) : sat(law(t, x)));
   // State: theta, theta_dot, wheel speed (inertial), wheel angle relative to body
-  const f = (_t: number, x: number[], u: number) => [x[1], (u + p.dist) / Ia, -u / p.Iw, x[2] - x[1]];
+  const wheelOn = p.actuator !== 'thrusters';
+  const f = (_t: number, x: number[], u: number) => [x[1], (u + p.dist) / Ia, wheelOn ? -u / p.Iw : 0, x[2] - x[1]];
   // PD is the analog law from lecture, so evaluate it inside every RK stage. Bang-bang
   // switches land on the grid, so holding the torque over each step is exact.
   const r = integrate(f, applied, [0, 0, 0, 0], { dt, tEnd, controlMode: mode === 'pd' ? 'continuous' : 'zoh' });
