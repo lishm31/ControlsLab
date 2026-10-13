@@ -14,3 +14,6 @@ export * from './metrics';
 export * from './routh';
 export * from './secondOrder';
 export * from './units';
+export * from './parse';
+export * from './pfrac';
+export * from './design';

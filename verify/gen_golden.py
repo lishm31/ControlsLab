@@ -225,6 +225,75 @@ def gen_routh(rng):
     return cases
 
 
+# ---------------------------------------------------------------- partial fractions
+def gen_residue(rng):
+    cases = []
+    fixed = [
+        ([1], [1, 3, 2]),
+        ([1, 3], [1, 3, 2, 0]),
+        ([2, 1], [1, 2, 5]),
+        ([1], [1, 4, 6, 4, 1]),  # (s+1)^4
+        ([3, 2, 1], [1, 2, 1, 0]),  # repeated pole at -1 and one at 0
+        ([1, 0, 0, 2], [1, 3, 2]),  # improper: direct term
+        ([5], np.poly([-1 + 2j, -1 - 2j, -1 + 2j, -1 - 2j]).real.tolist()),  # repeated complex pair
+        ([1, 2], [1, 0, 4, 0]),
+    ]
+    for _ in range(25):
+        n = int(rng.integers(1, 6))
+        m = int(rng.integers(0, n))
+        fixed.append((rng.uniform(-3, 3, size=m + 1).tolist(), random_stable_poly(rng, n, allow_rhp=True).tolist()))
+    for num, den in fixed:
+        r, p, k = scipy.signal.residue(num, den)
+        # scipy returns repeated poles with increasing power, in pole groups
+        terms = []
+        i = 0
+        p = np.asarray(p)
+        r = np.asarray(r)
+        while i < len(p):
+            j = i
+            while j + 1 < len(p) and abs(p[j + 1] - p[i]) <= 1e-3 * max(1, abs(p[i])):
+                j += 1
+            for power, idx in enumerate(range(i, j + 1), start=1):
+                terms.append({"pole": [float(p[idx].real), float(p[idx].imag)], "power": power, "coeff": [float(r[idx].real), float(r[idx].imag)]})
+            i = j + 1
+        cases.append({"num": list(map(float, num)), "den": list(map(float, den)), "terms": terms, "direct": np.atleast_1d(k).astype(float).tolist()})
+    return cases
+
+
+def gen_design(rng):
+    pade_cases = []
+    for T in [0.1, 0.5, 1.0, 2.5]:
+        for n in [1, 2, 3, 4]:
+            num, den = control.pade(T, n)
+            pade_cases.append({"T": T, "n": n, "num": list(map(float, num)), "den": list(map(float, den))})
+    acker_cases = []
+    for _ in range(15):
+        n = int(rng.integers(2, 6))
+        A = rng.normal(size=(n, n))
+        B = rng.normal(size=(n, 1))
+        poles = np.roots(random_stable_poly(rng, n))
+        K = control.acker(A, B, poles)
+        acker_cases.append({"A": mat(A), "B": mat(B), "poles": cplx(poles), "K": np.asarray(K).ravel().tolist()})
+    g = 9.81
+    lqr_cases = []
+    systems = [
+        (np.array([[0, 1], [0, 0]]), np.array([[0], [1]])),
+        (np.array([[0, 1, 0, 0], [0, 0, -g, 0], [0, 0, 0, 1], [0, 0, 0, 0]]), np.array([[0], [0], [0], [1 / 6.86e-5]])),
+        (np.array([[0, 1], [-2, -0.3]]), np.array([[0], [1]])),
+    ]
+    for _ in range(8):
+        n = int(rng.integers(2, 6))
+        m = int(rng.integers(1, 3))
+        systems.append((rng.normal(size=(n, n)), rng.normal(size=(n, m))))
+    for A, B in systems:
+        n, m = B.shape
+        Q = np.diag(rng.uniform(0.5, 5, size=n))
+        R = np.diag(rng.uniform(0.2, 3, size=m))
+        K, X, E = control.lqr(A, B, Q, R)
+        lqr_cases.append({"A": mat(A), "B": mat(B), "Q": mat(Q), "R": mat(R), "K": mat(K), "X": mat(X), "poles": cplx(E)})
+    return pade_cases, acker_cases, lqr_cases
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=str(HERE / "golden"))
@@ -235,6 +304,10 @@ def main():
 
     eig_cases, expm_cases = gen_matrices(rng)
     tf2ss_cases, ss2tf_cases = gen_convert(rng)
+    # New case families get their own stream so adding them never reshuffles older goldens.
+    rng2 = np.random.default_rng(20261014)
+    residue_cases = gen_residue(rng2)
+    pade_cases, acker_cases, lqr_cases = gen_design(rng2)
     files = {
         "roots.json": gen_roots(rng),
         "eig.json": eig_cases,
@@ -244,6 +317,10 @@ def main():
         "ss2tf.json": ss2tf_cases,
         "responses.json": gen_responses(rng),
         "routh.json": gen_routh(rng),
+        "residue.json": residue_cases,
+        "pade.json": pade_cases,
+        "acker.json": acker_cases,
+        "lqr.json": lqr_cases,
     }
     meta = {"numpy": np.__version__, "scipy": scipy.__version__, "control": control.__version__}
     for name, data in files.items():
