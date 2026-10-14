@@ -61,6 +61,7 @@ Plain student voice, casual and direct. No hype words (no "powerful", "seamless"
 ## Process
 
 - One commit per meaningful step, clear message.
+- Commits are authored by Lisha M (`206048137+lishm31@users.noreply.github.com`). No AI co-author or session trailers in commit messages.
 - Ask before adding any dependency beyond: react, react-dom, three, katex, vite, @vitejs/plugin-react, typescript, vitest, and their @types.
 - Failure Replays (C-14) are simplified, clearly labeled educational reconstructions with cited sources. Never claim to reproduce actual flight software.
 - Deploys to GitHub Pages from `main` via `.github/workflows/deploy.yml` (Settings > Pages > Source must be "GitHub Actions").
