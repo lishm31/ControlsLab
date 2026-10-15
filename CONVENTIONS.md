@@ -29,6 +29,7 @@ python -m venv .venv && .venv/bin/pip install -r verify/requirements.txt
 1. Model, sim, visual, and problems built.
 2. Tests pass: sim vs closed-form theory, physical invariants (momentum, saturation limits), and every problem generator over 200 seeds (`check(solve())` passes, `toSim(solve())` reproduces the answer in the sim, design problems have a valid answer).
 3. `notes.md` has the portfolio writeup: derivation, results, what surprised me, where theory and sim disagreed and why.
+4. The live site is updated (`scripts/publish-site.sh`, then push the portfolio repo) and the README module table and live module list are current.
 
 ## Math conventions
 
@@ -64,4 +65,5 @@ Plain student voice, casual and direct. No hype words (no "powerful", "seamless"
 - Commits are authored by Lisha M (`206048137+lishm31@users.noreply.github.com`). No AI co-author or session trailers in commit messages.
 - Ask before adding any dependency beyond: react, react-dom, three, katex, vite, @vitejs/plugin-react, typescript, vitest, and their @types.
 - Failure Replays (C-14) are simplified, clearly labeled educational reconstructions with cited sources. Never claim to reproduce actual flight software.
-- Deploys to GitHub Pages from `main` via `.github/workflows/deploy.yml` (Settings > Pages > Source must be "GitHub Actions").
+- Live at https://lishamaganti.com/controls-lab/, served by Vercel from the `lishamaganti-portfolio` repo. `scripts/publish-site.sh` builds and copies `dist/` into `../lishamaganti-portfolio/controls-lab`; then commit and push that repo.
+- CI (`.github/workflows/ci.yml`) runs typecheck, tests, build, and the golden drift check on every push.

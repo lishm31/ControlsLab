@@ -2,9 +2,40 @@
 
 An interactive lab for the control theory half of my Dynamics and Control class at CU Boulder. Every lecture gets a module with a simulation, a visual, and practice problems that I work by hand and then check against the sim.
 
-It runs fully in the browser (Vite, TypeScript, React, Three.js). The math lives in a small TypeScript library in `src/core` that is unit tested and cross-checked against scipy and python-control.
+**Live demo: [lishamaganti.com/controls-lab](https://lishamaganti.com/controls-lab/)**  
+Made by Lisha Maganti · [lishamaganti.com](https://lishamaganti.com)
 
-## Modules
+![C-2 Reaction Wheel Slew: 3D spacecraft, live telemetry, pole plot, and theory vs measured table](docs/screenshots/c02-reaction-wheel.png)
+
+## By the numbers
+
+- 2 lecture modules live, 12 more planned (one per lecture)
+- 472 automated tests
+- 325 reference cases generated with SciPy and python-control that the math library has to match
+- 12 practice problem types, each checked over 200 random seeds and played back through the simulator
+
+## Live modules
+
+### C-1 Linear Systems Explorer
+Free response of a second order system and what the eigenvalues say about it.
+- Sliders for ζ and ωn, a negative stiffness toggle, and initial conditions
+- Mass-spring-damper or pendulum drawn from the simulated state
+- Eigenvalues on the s-plane with the path they trace as ζ sweeps
+- Phase portrait with a direction field and eigenvector lines. Click anywhere to start a new trajectory
+- Practice: m, c, k to ωn and ζ, eigenvalues of A, free response at a time, linearizing a pendulum, damper design
+- Writeup: [C-1 notes](src/modules/c01-linear-systems/notes.md)
+
+![C-1 Linear Systems Explorer: mass-spring-damper, free response with envelope, eigenvalue locus, and phase portrait](docs/screenshots/c01-linear-systems.png)
+
+### C-2 Reaction Wheel Slew
+Turning a spacecraft about one axis, open loop bang-bang vs PD feedback.
+- 3D spacecraft with a reaction wheel cutaway. The wheel spin comes from the simulated wheel speed
+- Inertia error, disturbance torque, torque limit, and wheel vs thruster actuation
+- Theory vs measured table that flags where the lecture formulas and the sim disagree, and why
+- Practice: reading gains, designing to a spec (judged by the sim), planning a bang-bang slew, inertia error, disturbance offset
+- Writeup: [C-2 notes](src/modules/c02-reaction-wheel/notes.md)
+
+## Roadmap
 
 | Code | Lecture | Module | Status |
 |---|---|---|---|
@@ -23,20 +54,24 @@ It runs fully in the browser (Vite, TypeScript, React, Three.js). The math lives
 | C-13 | Dec 1 | TF to SS Converter | planned |
 | C-14 | Dec 3 | Failure Replays | planned |
 
-Each live module has a writeup next to its code: [C-1 notes](src/modules/c01-linear-systems/notes.md), [C-2 notes](src/modules/c02-reaction-wheel/notes.md).
-
 ## How the math is checked
 
-- `src/core`: polynomials and roots, eigenvalues, matrix exponential, transfer functions, state space, exact discretized step/impulse/ramp responses, step metrics, Routh arrays, RK4, partial fractions and inverse Laplace, Pade delay, error constants, Ackermann pole placement, and LQR.
-- `verify/gen_golden.py` writes about 330 test cases from numpy, scipy, and python-control into `verify/golden/`. The TS tests compare against them. CI regenerates them and fails if anything drifted.
-- Each module tests its sim against the closed-form theory from lecture, and runs every practice problem generator over 200 random seeds to make sure the hidden answer is right and that it plays out the same way in the sim.
+- `src/core` is a small math library with no UI code: polynomial roots, eigenvalues (Francis QR), matrix exponential, transfer functions, state space and conversions between them, exact step/impulse/ramp responses, step metrics, Routh arrays, RK4, partial fractions and inverse Laplace, Pade delay, error constants, Ackermann pole placement, and LQR.
+- `verify/gen_golden.py` writes 325 test cases from numpy, scipy, and python-control into `verify/golden/`. The TypeScript tests compare against them, and CI regenerates them on every push and fails if anything drifted.
+- Each module tests its sim against the closed-form theory from lecture, and checks physical invariants (wheel momentum bookkeeping, torque limits, energy in the undamped case).
+- Every practice problem generator runs over 200 random seeds in the tests, to make sure the hidden answer is right and plays out the same way in the sim.
 
-## Running it
+## Tech stack
+
+TypeScript, React, Vite, Three.js (3D), KaTeX (math), Vitest (tests). Python with SciPy and python-control for the reference data. Plots are hand-built SVG. Everything runs in the browser.
+
+## Running it locally
 
 ```
 npm install
 npm run dev        # local dev server
 npm test           # all tests
+npm run typecheck  # strict TypeScript
 npm run build      # production build into dist/
 ```
 
@@ -48,6 +83,12 @@ python -m venv .venv
 .venv/bin/python verify/gen_golden.py
 ```
 
-## Deploying
+## Hosting
 
-`.github/workflows/deploy.yml` runs tests on every push and deploys `main` to GitHub Pages. One time setup: repo Settings, Pages, Source: GitHub Actions.
+The live site is served from my portfolio repo ([lishamaganti-portfolio](https://github.com/lishm31/lishamaganti-portfolio)) on Vercel, under `/controls-lab/`. To update it after a change here:
+
+```
+scripts/publish-site.sh    # builds and copies dist/ into ../lishamaganti-portfolio/controls-lab
+```
+
+Then commit and push the portfolio repo and Vercel deploys it. CI in this repo (`.github/workflows/ci.yml`) runs the typecheck, tests, build, and golden drift check on every push.

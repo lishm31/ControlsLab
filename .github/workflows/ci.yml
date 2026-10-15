@@ -1,4 +1,4 @@
-name: CI and Pages
+name: CI
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: pages-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -25,10 +25,6 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
-      - uses: actions/upload-pages-artifact@v3
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-        with:
-          path: dist
 
   goldens:
     # Regenerates the scipy / python-control golden files and fails if they drifted.
@@ -42,17 +38,3 @@ jobs:
           cache-dependency-path: verify/requirements.txt
       - run: pip install -r verify/requirements.txt
       - run: python verify/compare_golden.py
-
-  deploy:
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    needs: [test, goldens]
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
